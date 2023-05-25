@@ -9,7 +9,7 @@ int tcools = (3089838.00 * pow(float(max_speed), -1.00161534)) * 1.5;
 int motor_microsteps = 64;
 int move_to_step = 0;
 int move_to_percent = 0;
-int set_zero = 0; // Set to 1 to set home position
+bool set_zero = false; 
 bool run_motor = false;
 int wifi_set;
 bool wifi_button = false;

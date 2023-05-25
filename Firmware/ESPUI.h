@@ -69,7 +69,7 @@ void buttonSetZeroCall(Control* sender, int type)
   {
     case B_DOWN:
       Serial.println("Button Pressed");
-      set_zero = 1;
+      set_zero = true;
       Serial.print("set_zero: ");
       Serial.println(set_zero);
       break;

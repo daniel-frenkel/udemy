@@ -53,10 +53,10 @@ void MotorTask(void *pvParameters)
       ESPUI.updateLabel(positionLabel, String(int(((float)current_position / (float)max_steps) * 100)));
       Serial.println("Motor Complete");
     }
-    else if (set_zero == 1)
+    else if (set_zero == true)
     {
       setZero();
-      set_zero = 0;
+      set_zero = false;
     }
     else if (wifi_button == true)
     {
