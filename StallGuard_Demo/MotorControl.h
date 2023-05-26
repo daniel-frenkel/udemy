@@ -1,7 +1,7 @@
-#define ENABLE_PIN 51
-#define RXD2 17
-#define TXD2 16
-#define STALLGUARD 21 //Be sure to only use intrrupt pins!!
+#define ENABLE_PIN       51
+#define RXD2             17
+#define TXD2             16
+#define STALLGUARD       21         //Be sure to only use intrrupt pins!!
 #define R_SENSE          0.11f      // R_SENSE for current calc.
 #define DRIVER_ADDRESS   0b00       // TMC2209 Driver address according to MS1 and MS2
 
@@ -13,9 +13,10 @@ int set_tcools;
 int motor_microsteps = 64;
 bool run_motor = false;
 
-// We communicate with the TMC2209 over UART
-// But the Arduino UNO only have one Serial port which is connected to the Serial Monitor
-// We can use software serial on the UNO, and hardware serial on the ESP32 or Mega 2560
+/* We communicate with the TMC2209 over UART.
+ * But the Arduino UNO only has one Serial port which is connected to the Serial Monitor
+ * We have to use software serial on the UNO, and hardware serial on the ESP32 or Mega 2560
+ */
 #if defined(ESP32) || defined(__AVR_ATmega2560__)
 #define SERIAL_PORT_2    Serial2    // TMC2208/TMC2224 HardwareSerial port
 #else
@@ -37,7 +38,6 @@ void stalled_position()
 }
 #endif
 
-
 void setup_motors() {
   pinMode(ENABLE_PIN, OUTPUT);
   pinMode(STALLGUARD , INPUT);
@@ -55,5 +55,4 @@ void setup_motors() {
   driver.shaft(true); // Set the shaft direction.
   driver.en_spreadCycle(false); // Disable SpreadCycle. We want StealthChop becuase it works with StallGuard.
   driver.pdn_disable(true); // Enable UART control
-
 }
