@@ -4,7 +4,7 @@
 #define RXD2 16
 #define TXD2 17
 #define STALLGUARD 12
-#define R_SENSE          0.10f      // R_SENSE for current calc.
+#define R_SENSE          0.11f      // R_SENSE for current calc.
 #define DRIVER_ADDRESS   0b00       // TMC2209 Driver address according to MS1 and MS2
 
 bool stalled_motor = false;

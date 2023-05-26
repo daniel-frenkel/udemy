@@ -5,20 +5,35 @@
 #include <SPI.h>
 #include "MotorControl.h"
 
+
 void setup() {
   Serial.begin(115200);
   setup_motors();
 
-  //We use the internal pulse generator of the TMC2209 so that we can monitor the SG_RESULT
-  driver.VACTUAL(5000);
+  //Change these values to get different results
+  set_velocity = 5000;
+  set_current = 600;
+  set_stall = 20;
+  set_tcools = 1000; //800 TSTEP
+
+  
+  driver.VACTUAL(set_velocity); //We use the internal pulse generator of the TMC2209 so that we can monitor the SG_RESULT
+  driver.rms_current(set_current);
+  driver.SGTHRS(set_stall);
+  driver.TCOOLTHRS(set_tcools);
+  digitalWrite(ENABLE_PIN, LOW);
+  
 }
 
 void loop()
 {
+  //Serial.println(digitalRead(STALLGUARD));
   Serial.println(driver.SG_RESULT());
-  if(stalled_motor)
+  //Serial.println(driver.TSTEP());
+  if (stalled_motor == true)
   {
-  Serial.println("STALLED");
-  stalled_motor = false;
+    Serial.println("STALLED");
+    stalled_motor = false;
   }
+  delay(50);
 }
