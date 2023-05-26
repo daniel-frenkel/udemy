@@ -1,5 +1,13 @@
-#define STEP_PIN         52
-#define DIR_PIN          53
+/* STEP PIN SETUP: THESE PINS ONLY
+ * AVR ARmega328p: only Pin 9 and 10.
+ * AVR ARmega32u4: only Pin 9, 10 and 11.
+ * AVR ARmega2560: only Pin 6, 7 and 8.
+ * ESP32: This can be any output capable port pin.
+ * Atmel Due: This can be one of each group of pins: 34/67/74/35, 17/36/72/37/42, 40/64/69/41, 9, 8/44, 7/45, 6
+*/
+
+#define STEP_PIN         6
+#define DIR_PIN          3
 #define ENABLE_PIN       51
 #define RXD2             16
 #define TXD2             17
@@ -8,12 +16,12 @@
 #define DRIVER_ADDRESS   0b00       // TMC2209 Driver address according to MS1 and MS2
 
 bool stalled_motor = false;
-int move_to_step;
+long long move_to_step;
 int set_current;
 int set_stall;
-int set_accel;
-int set_velocity;
-int set_tcools;
+long set_accel;
+long set_velocity;
+long set_tcools;
 int motor_microsteps = 64;
 bool run_motor = false;
 int current_position = 0;
@@ -44,31 +52,6 @@ void stalled_position()
 }
 #endif
 
-
-void move_motor() {
-  stalled_motor = false;
-  if (current_position == move_to_step)
-  {
-    Serial.println("ALREADY THERE!");
-  }
-  else
-  {
-    Serial.println("Moving");
-    stepper->moveTo(move_to_step);
-    while (stepper->getCurrentPosition() != stepper->targetPos())
-    {
-      if (stalled_motor == true)
-      {
-        printf("Stalled\n");
-        stepper->forceStop();
-        break;
-      }
-    }
-  }
-  current_position = stepper->getCurrentPosition();
-  printf("Motor Function Complete\n");
-}
-
 void setup_motors(){
   pinMode(ENABLE_PIN, OUTPUT);
   pinMode(STALLGUARD , INPUT);
@@ -86,6 +69,7 @@ void setup_motors(){
   driver.shaft(true); // Set the shaft direction.
   driver.en_spreadCycle(false); // Disable SpreadCycle. We want StealthChop becuase it works with StallGuard.
   driver.pdn_disable(true); // Enable UART control
+  driver.VACTUAL(0); // Enable UART control
 
   engine.init();
   stepper = engine.stepperConnectToPin(STEP_PIN);
