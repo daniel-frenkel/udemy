@@ -13,9 +13,10 @@ void setup() {
   move_to_step = 100000; //Change this value to set the position to move to (Negative will reverse)
   set_velocity = 20000;
   set_accel = 5000;
-  set_current = 600;  
-  set_stall = 80;      //Do not set the value too high or the TMC will not detect it. Start low and work your way up
-  set_tcools = 200;   // Set slightly higher than the MAX TSTEP value you see
+  set_current = 600;
+  // IF StallGuard does not work, it's because these two values are not set correctly or your pins are not correct.
+  set_stall = 80;      //Do not set the value too high or the TMC will not detect it. Start low and work your way up.
+  set_tcools = 200;   // Set slightly higher than the max TSTEP value you see
 
   //Do not change these
   driver.rms_current(set_current);
