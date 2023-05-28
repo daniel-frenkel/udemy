@@ -30,7 +30,6 @@ int  set_current = 600;
 int  set_stall = 80;      //Do not set the value too high or the TMC will not detect it. Start low and work your way up.
 long  set_tcools = 200;   // Set slightly higher than the max TSTEP value you see
 
-
 bool stalled_motor = false;
 int motor_microsteps = 64;
 bool run_motor = false;
