@@ -66,6 +66,7 @@ void setup() {
   driver.en_spreadCycle(false); // Disable SpreadCycle. We want StealthChop becuase it works with StallGuard.
   driver.pdn_disable(true); // Enable UART control
   driver.VACTUAL(set_velocity); //We use the internal pulse generator of the TMC2209 so that we can monitor the SG_RESULT
+  driver.index_step(true); //Index pin output step pulses from internal pulse generator
   driver.rms_current(set_current);
   driver.SGTHRS(set_stall);
   driver.TCOOLTHRS(set_tcools);
