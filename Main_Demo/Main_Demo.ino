@@ -32,7 +32,6 @@ long  set_tcools = 200;   // Set slightly higher than the max TSTEP value you se
 
 bool stalled_motor = false;
 int motor_microsteps = 64;
-bool run_motor = false;
 long long current_position = 0;
 
 // We communicate with the TMC2209 over UART
