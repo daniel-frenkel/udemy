@@ -69,7 +69,7 @@ void setup() {
   driver.microsteps(64);
   driver.TCOOLTHRS(set_tcools);
   driver.diag0_stall(true); 
-  driver.diag0_int_pushpull(false); //Diag goes low on Stall
+  driver.diag0_int_pushpull(true); //Diag goes HIGH on Stall
   driver.TPWMTHRS(0);
   driver.semin(0); 
   driver.chm(false);
@@ -92,16 +92,17 @@ void loop()
   while (stepper->getCurrentPosition() != stepper->targetPos())
   {
     
-    Serial.print("SG_RESULT: ");
-    Serial.println(driver.sg_result());
-    
     Serial.print("TSTEP: ");
     Serial.println(driver.TSTEP()); //Check TSTEP value
+
+    Serial.print("SG_RESULT: ");
+    Serial.println(driver.sg_result()); // BUG! SG_RESULT Value is not being output for some reason. I cannot figure out why
 
     if (stalled_motor == true)
     {
       Serial.println("STALLED");
       stepper->forceStop();
+      delay(2000);
       break;
     }
   }
@@ -111,16 +112,18 @@ void loop()
 
   while (stepper->getCurrentPosition() != stepper->targetPos())
   {
-    Serial.print("SG_RESULT: ");
-    Serial.println(driver.sg_result());
-    
+
     Serial.print("TSTEP: ");
     Serial.println(driver.TSTEP());
-
+    
+    Serial.print("SG_RESULT: ");
+    Serial.println(driver.sg_result()); // BUG! SG_RESULT Value is not being output for some reason. I cannot figure out why
+    
     if (stalled_motor == true)
     {
       Serial.println("STALLED");
       stepper->forceStop();
+      delay(2000);
       break;
     }
   }
