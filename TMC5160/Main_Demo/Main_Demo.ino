@@ -22,17 +22,17 @@
 #define R_SENSE          0.075f      // R_SENSE for current calc.
 
 //Change these values to get different results
-long long  move_to_step = 200000; //Change this value to set the position to move to (Negative will reverse)
+long long  move_to_step = 500000; //Change this value to set the position to move to (Negative will reverse)
 long  set_velocity = 20000;
 int  set_accel = 1000;
-int  set_current = 600;
+int  set_current = 400;
 
 // IF StallGuard does not work, it's because these two values are not set correctly or your pins are not correct.
-int  set_stall = 0;      //Do not set the value too high or the TMC will not detect it. Start low and work your way up.
-long  set_tcools = 400;   // Set slightly higher than the max TSTEP value you see
+int  set_stall = 5;      //-64 to 63 / Start at 0
+long  set_tcools = 200;   // Set slightly higher than the max TSTEP value you see
 
 bool stalled_motor = false;
-int motor_microsteps = 64;
+int motor_microsteps = 2;
 long long current_position = 0;
 
 FastAccelStepperEngine engine = FastAccelStepperEngine();
@@ -51,6 +51,8 @@ void stalled_position()
 }
 #endif
 
+int sg_min_val = 1023;
+int sg;
 
 void setup() {
   Serial.begin(115200);
@@ -74,19 +76,24 @@ void setup() {
   driver.semin(0); 
   driver.chm(false);
   driver.VDCMIN(false);
+  driver.sfilt(true);
   
   engine.init();
   stepper = engine.stepperConnectToPin(STEP_PIN);
   stepper->setDirectionPin(DIR_PIN);
   stepper->setEnablePin(ENABLE_PIN);
-  stepper->setAutoEnable(true);
+  stepper->setAutoEnable(false); // Auto enable causes problems with SG_RESULT monitoring.
   stepper->setSpeedInHz(set_velocity);
   stepper->setAcceleration(set_accel);
   stepper->setCurrentPosition(0);
+
+  digitalWrite(ENABLE_PIN, LOW);// Auto enable causes problems with SG_RESULT monitoring on TMC5160.
+  
 }
 
 void loop()
 {
+  
   stalled_motor = false;
   stepper->moveTo(move_to_step);
   while (stepper->getCurrentPosition() != stepper->targetPos())
@@ -96,35 +103,32 @@ void loop()
     Serial.println(driver.TSTEP()); //Check TSTEP value
 
     Serial.print("SG_RESULT: ");
-    Serial.println(driver.sg_result()); // BUG! SG_RESULT Value is not being output for some reason. I cannot figure out why
-
+    Serial.println(driver.sg_result()); //Check SG_RESULT value/ The set_stall value effects this
+    
     if (stalled_motor == true)
     {
       Serial.println("STALLED");
-      stepper->forceStop();
-      delay(2000);
-      break;
-    }
+      stalled_motor = false;
+      delay(1000);
+   }
   }
 
   stalled_motor = false;
   stepper->moveTo(0);
-
   while (stepper->getCurrentPosition() != stepper->targetPos())
   {
-
-    Serial.print("TSTEP: ");
-    Serial.println(driver.TSTEP());
     
+    Serial.print("TSTEP: ");
+    Serial.println(driver.TSTEP()); //Check TSTEP value
+
     Serial.print("SG_RESULT: ");
-    Serial.println(driver.sg_result()); // BUG! SG_RESULT Value is not being output for some reason. I cannot figure out why
+    Serial.println(driver.sg_result()); //Check SG_RESULT value/ The set_stall value effects this
     
     if (stalled_motor == true)
     {
       Serial.println("STALLED");
-      stepper->forceStop();
-      delay(2000);
-      break;
-    }
+      stalled_motor = false;
+      delay(1000);
+   }
   }
 }
