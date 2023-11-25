@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include "FastAccelStepper.h"
 #include <HardwareSerial.h>
 #include <TMCStepper.h>
 #include <SPI.h>
