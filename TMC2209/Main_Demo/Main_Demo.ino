@@ -38,7 +38,7 @@ long long current_position = 0;
 // But the Arduino UNO only have one Serial port which is connected to the Serial Monitor
 // We can use software serial on the UNO, and hardware serial on the ESP32 or Mega 2560
 #if defined(ESP32) || defined(__AVR_ATmega2560__)
-#define SERIAL_PORT_2    Serial2    // TMC2208/TMC2224 HardwareSerial port
+#define SERIAL_PORT_2    Serial2    // TMC2209/TMC2226 HardwareSerial port
 #else
 #include<SoftwareSerial.h>
 SoftwareSerial SERIAL_PORT_2 (2, 3);   //DPin-2 will work as SRX-pin, and DPin-3 will work as STX-pin; S for soft
@@ -48,13 +48,15 @@ FastAccelStepperEngine engine = FastAccelStepperEngine();
 FastAccelStepper *stepper = NULL;
 TMC2209Stepper driver(&SERIAL_PORT_2, R_SENSE , DRIVER_ADDRESS);
 
+// Interrupt
+// This interrupt will fire when a HIGH rising signal is detected on the DIAG pin. This indicates a stall.
 #if defined(ESP32) //ESP32 needs special "IRAM_ATTR" in interrupt
 void IRAM_ATTR stalled_position()
 {
   stalled_motor = true;
 }
 #else
-void stalled_position()
+void stalled_position() //ATmega does not need need special "IRAM_ATTR" in interrupt
 {
   stalled_motor = true;
 }
@@ -80,7 +82,7 @@ void setup() {
   driver.microsteps(motor_microsteps); //Set the number of microsteps. Due to the "MicroPlyer" feature, all steps get converterd to 256 microsteps automatically. However, setting a higher step count allows you to more accurately more the motor exactly where you want.
   driver.TPWMTHRS(0); //DisableStealthChop PWM mode/ Page 25 of datasheet
   driver.semin(0); // Turn off smart current control, known as CoolStep. It's a neat feature but is more complex and messes with StallGuard.
-  driver.shaft(true); // Set the shaft direction.
+  driver.shaft(true); // Set the shaft direction. Only use this command one time during setup to change the direction of your motor. Do not use this in your code to change directions.
   driver.en_spreadCycle(false); // Disable SpreadCycle. We want StealthChop becuase it works with StallGuard.
   driver.pdn_disable(true); // Enable UART control
   driver.VACTUAL(0); // Enable UART control
@@ -101,20 +103,20 @@ void setup() {
 
 void loop()
 {
-  stalled_motor = false;
-  stepper->moveTo(move_to_step);
-  while (stepper->getCurrentPosition() != stepper->targetPos())
+  stalled_motor = false; // We'll set the stall flag to false, in case it was triggered easlier.
+  stepper->moveTo(move_to_step); // We tell the motor to move to a spcific position.
+  while (stepper->getCurrentPosition() != stepper->targetPos()) // While the current position DOES NOT equal the target position, we can do some things. You can just add a delay here as well to kill time.
   {
 
-    Serial.print("SG_RESULT: ");
-    Serial.println(driver.SG_RESULT());
+    Serial.print("SG_RESULT: "); 
+    Serial.println(driver.SG_RESULT()); // Print the SG_RESULT value when you are tuning stallGuard
     Serial.print("TSTEP: ");
-    Serial.println(driver.TSTEP()); //Check TSTEP value
+    Serial.println(driver.TSTEP()); //Print the TSTEP value when you are tuning stallGuard
 
-    if (stalled_motor == true)
+    if (stalled_motor == true) // If the motor stall, this will print "Stalled"
     {
       Serial.println("Stalled");
-      stepper->forceStop();
+      stepper->forceStop(); // This instantly stops the motor.
       break;
     }
   }
